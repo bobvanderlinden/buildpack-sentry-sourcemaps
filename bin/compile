@@ -37,16 +37,7 @@ curl -sSf "${API}/releases/" \
   -X POST \
   -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
   -H 'Content-Type: application/json' \
-  -d "
-  {
-    \"version\": \"${SOURCE_VERSION}\",
-    \"refs\": [{
-      \"repository\": \"${SOURCEMAP_REPO}\",
-      \"commit\": \"${SOURCE_VERSION}\"
-    }],
-    \"projects\": [\"${SOURCEMAP_SENTRY_PROJECT}\"]
-  }
-  "
+  -d "$(${JQ} --null-input --compact-output --arg version "${SOURCE_VERSION}" --arg repository "${SOURCEMAP_REPO}" --arg commit "${SOURCE_VERSION}" --arg project "${SOURCEMAP_SENTRY_PROJECT}" '{version: $version, refs: { repository: $repository, commit: $commit }, projects: [$project] }')"
   >/dev/null
 
 # Retrieve files

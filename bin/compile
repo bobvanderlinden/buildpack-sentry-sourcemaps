@@ -52,27 +52,23 @@ curl -sSf "${API}/releases/${SOURCE_VERSION}/files/" \
 
 # Upload the sourcemaps
 cd "${build}/${SOURCEMAP_DIR}"
-for map in {{**/,}*.js,{**/,}*.js.map}
+for file in $(find . \( -iname '*.js' -o -iname '*.js.map' \) -not -path './node_modules/*' -not -path './.heroku/*' | cut -c 3-)
 do
-    if [ "$map" = '*.js' ] || [ "$map" = '*.js.map' ] || [ "$map" = '**/*.js' ] || [ "$map" = '**/*.js.map' ]; then
-      continue
-    fi
-
-    sum=$(sha1sum "${map}" | cut -c -40)
-    name="${SOURCEMAP_URL_PREFIX}${map}"
+    sum=$(sha1sum "${file}" | cut -c -40)
+    name="${SOURCEMAP_URL_PREFIX}${file}"
     res=($(${JQ} -r ". | map(select(.name == \"${name}\")) | first | .id + \" \" + (.sha1 // \"\")" "${files}"))
 
     if [[ "${res[0]}" == "" ]]; then
-        echo "       Uploading ${map} to Sentry"
+        echo "       Uploading ${file} to Sentry"
         curl -sSf "${API}/releases/${SOURCE_VERSION}/files/" \
              -X POST \
              -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
-             -F file=@"${map}" \
+             -F file=@"${file}" \
              -F name="${name}" \
              >/dev/null
 
     elif [[ "${res[1]}" != "${sum}" ]]; then
-        echo "       Updating ${map} on Sentry"
+        echo "       Updating ${file} on Sentry"
         curl -sSf "${API}/releases/${SOURCE_VERSION}/files/${res[0]}/" \
              -X DELETE \
              -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
@@ -80,12 +76,12 @@ do
         curl -sSf "${API}/releases/${SOURCE_VERSION}/files/" \
              -X POST \
              -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
-             -F file=@"${map}" \
+             -F file=@"${file}" \
              -F name="${name}" \
              >/dev/null
 
     else
-        echo "       ${map} is up-to-date"
+        echo "       ${file} is up-to-date"
     fi
 done
 

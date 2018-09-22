@@ -2,6 +2,7 @@
 # bin/compile <build-dir> <cache-dir> <env-dir>
 
 set -e
+set -x
 
 mkdir -p "$1" "$2"
 build=$(cd "$1/" && pwd)
@@ -31,13 +32,13 @@ fi
 API="https://sentry.io/api/0/organizations/${SOURCEMAP_SENTRY_ORG}"
 
 # Create a release
-echo "-----> Creating Sentry release ${SOURCE_VERSION} for organization '${SENTRY_ORG}' in project '${SENTRY_PROJECT}'"
+echo "-----> Creating Sentry release ${SOURCE_VERSION} for organization '${SOURCEMAP_SENTRY_ORG}' in project '${SOURCEMAP_SENTRY_PROJECT}'"
 
 curl -sSf "${API}/releases/" \
   -X POST \
   -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
   -H 'Content-Type: application/json' \
-  -d "$(${JQ} --null-input --compact-output --arg version "${SOURCE_VERSION}" --arg repository "${SOURCEMAP_REPO}" --arg commit "${SOURCE_VERSION}" --arg project "${SOURCEMAP_SENTRY_PROJECT}" '{version: $version, refs: { repository: $repository, commit: $commit }, projects: [$project] }')"
+  -d "$(${JQ} --null-input --compact-output --arg version "${SOURCE_VERSION}" --arg repository "${SOURCEMAP_REPO}" --arg commit "${SOURCE_VERSION}" --arg project "${SOURCEMAP_SENTRY_PROJECT}" '{version: $version, projects: [$project] }')"
   >/dev/null
 
 # Retrieve files

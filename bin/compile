@@ -24,7 +24,7 @@ fi
 API="https://sentry.io/api/0/organizations/${SOURCEMAP_SENTRY_ORG}"
 
 # Create a release
-echo "-----> Creating Sentry release ${SOURCE_VERSION} for project ${SOURCEMAP_SENTRY_PROJECT}"
+echo "-----> Creating Sentry release ${SOURCE_VERSION} for organization '${SENTRY_ORG}' in project '${SENTRY_PROJECT}'"
 
 curl -sSf "${API}/releases/" \
   -X POST \
@@ -52,9 +52,9 @@ curl -sSf "${API}/releases/${SOURCE_VERSION}/files/" \
 
 # Upload the sourcemaps
 cd "${build}/${SOURCEMAP_DIR}"
-for map in {*.js,*.js.map}
+for map in {{**/,}*.js,{**/,}*.js.map}
 do
-    if [ "$map" = "*.js" ] || [ "$map" = "*.js.map" ]; then
+    if [ "$map" = '*.js' ] || [ "$map" = '*.js.map' ] || [ "$map" = '**/*.js' ] || [ "$map" = '**/*.js.map' ]; then
       continue
     fi
 

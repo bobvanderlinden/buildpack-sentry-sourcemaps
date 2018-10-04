@@ -51,7 +51,7 @@ curl -sSf "${API}/releases/${SOURCE_VERSION}/files/" \
 
 # Upload the sourcemaps
 cd "${build}/${SOURCEMAP_DIR}"
-for file in $(find . \( -iname '*.js' -o -iname '*.js.map' \) -not -path './node_modules/*' -not -path './.heroku/*' | cut -c 3-)
+for file in $(find . \( -iname '*.js' -o -iname '*.js.map' -o -iname '*.ts' \) -not -path './node_modules/*' -not -path './.heroku/*' | cut -c 3-)
 do
     sum=$(sha1sum "${file}" | cut -c -40)
     name="${SOURCEMAP_URL_PREFIX}${file}"
